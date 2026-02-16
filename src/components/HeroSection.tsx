@@ -1,4 +1,7 @@
-import { Activity, Brain, HeartPulse } from "lucide-react";
+import { Activity, Brain, HeartPulse, LogIn, LayoutDashboard } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { isAuthenticated } from "@/lib/api";
 
 const HeroSection = () => {
   return (
@@ -24,7 +27,7 @@ const HeroSection = () => {
           Using Decision Tree Classification Algorithm trained on the PIMA Indians Diabetes Dataset
         </p>
 
-        <div className="flex flex-wrap justify-center gap-6 text-primary-foreground/70 text-sm">
+        <div className="flex flex-wrap justify-center gap-6 text-primary-foreground/70 text-sm mb-8">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4" />
             <span>8 Medical Parameters</span>
@@ -37,6 +40,24 @@ const HeroSection = () => {
             <HeartPulse className="w-4 h-4" />
             <span>78.5% Accuracy</span>
           </div>
+        </div>
+
+        <div className="flex justify-center gap-3">
+          {isAuthenticated() ? (
+            <Link to="/dashboard">
+              <Button variant="secondary" size="lg" className="font-semibold">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Doctor Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <Link to="/login">
+              <Button variant="secondary" size="lg" className="font-semibold">
+                <LogIn className="w-4 h-4 mr-2" />
+                Doctor Login
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>

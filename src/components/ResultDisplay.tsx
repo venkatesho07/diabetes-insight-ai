@@ -1,11 +1,14 @@
 import { type PredictionResult } from "@/lib/decisionTree";
-import { ShieldCheck, ShieldAlert, TrendingUp } from "lucide-react";
+import { ShieldCheck, ShieldAlert, TrendingUp, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { downloadReport, isAuthenticated } from "@/lib/api";
 
 interface ResultDisplayProps {
   result: PredictionResult;
+  predictionId?: number | null;
 }
 
-const ResultDisplay = ({ result }: ResultDisplayProps) => {
+const ResultDisplay = ({ result, predictionId }: ResultDisplayProps) => {
   const isDiabetic = result.prediction === "Diabetic";
 
   return (
@@ -60,6 +63,17 @@ const ResultDisplay = ({ result }: ResultDisplayProps) => {
               ))}
             </ul>
           </div>
+        )}
+
+        {predictionId && isAuthenticated() && (
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => downloadReport(predictionId)}
+          >
+            <FileDown className="w-4 h-4 mr-2" />
+            Download Medical Report (PDF)
+          </Button>
         )}
       </div>
     </div>
