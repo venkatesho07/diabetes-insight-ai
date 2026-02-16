@@ -1,4 +1,4 @@
-# Backend dependencies for Diabetes Prediction System
+# Backend dependencies for Diabetes Prediction System — Phase 2
 fastapi==0.115.0
 uvicorn==0.30.6
 scikit-learn==1.5.2
@@ -6,3 +6,10 @@ pandas==2.2.3
 numpy==1.26.4
 joblib==1.4.2
 pydantic==2.9.2
+
+# Phase 2: Database, Auth & Reporting
+sqlalchemy==2.0.35
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.12
+reportlab==4.2.4
