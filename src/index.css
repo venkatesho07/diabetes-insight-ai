@@ -59,6 +59,7 @@
     --shadow-card: 0 4px 24px -4px hsl(200 25% 10% / 0.08);
     --shadow-elevated: 0 12px 40px -8px hsl(200 25% 10% / 0.12);
     --shadow-glow: 0 0 40px -10px hsl(168 65% 38% / 0.25);
+    --shadow-premium: 0 20px 60px -12px hsl(200 25% 10% / 0.15);
   }
 
   .dark {
@@ -117,5 +118,19 @@
   }
   .shadow-glow {
     box-shadow: var(--shadow-glow);
+  }
+  .shadow-premium {
+    box-shadow: var(--shadow-premium);
+  }
+  .glass-card {
+    background: hsl(0 0% 100% / 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
