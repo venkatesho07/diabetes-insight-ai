@@ -1,7 +1,8 @@
 import { type PredictionResult } from "@/lib/decisionTree";
-import { ShieldCheck, ShieldAlert, TrendingUp, FileDown } from "lucide-react";
+import { ShieldCheck, ShieldAlert, TrendingUp, FileDown, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadReport, isAuthenticated } from "@/lib/api";
+import { motion } from "framer-motion";
 
 interface ResultDisplayProps {
   result: PredictionResult;
@@ -12,63 +13,90 @@ const ResultDisplay = ({ result, predictionId }: ResultDisplayProps) => {
   const isDiabetic = result.prediction === "Diabetic";
 
   return (
-    <div className={`mt-8 rounded-2xl p-6 md:p-8 border-2 animate-in fade-in slide-in-from-bottom-4 duration-500 ${
-      isDiabetic
-        ? "border-destructive/30 bg-destructive/5"
-        : "border-success/30 bg-success/5"
-    }`}>
-      <div className="flex flex-col items-center text-center gap-4">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-          isDiabetic ? "bg-destructive/10" : "bg-success/10"
-        }`}>
-          {isDiabetic ? (
-            <ShieldAlert className="w-8 h-8 text-destructive" />
-          ) : (
-            <ShieldCheck className="w-8 h-8 text-success" />
-          )}
-        </div>
-
-        <div>
-          <h3 className="text-2xl font-bold font-display text-foreground mb-1">
-            {result.prediction}
-          </h3>
-          <div className="flex items-center justify-center gap-1 text-muted-foreground">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-sm">Confidence: {result.confidence}%</span>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, type: "spring" }}
+      className={`mt-10 rounded-2xl overflow-hidden shadow-premium border-2 ${
+        isDiabetic ? "border-destructive/30" : "border-success/30"
+      }`}
+    >
+      {/* Gradient header */}
+      <div className={`py-6 px-8 ${isDiabetic ? "bg-gradient-to-r from-destructive/10 to-destructive/5" : "bg-gradient-to-r from-success/10 to-success/5"}`}>
+        <div className="flex items-center gap-4">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+              isDiabetic ? "bg-destructive/15" : "bg-success/15"
+            }`}
+          >
+            {isDiabetic ? (
+              <ShieldAlert className="w-8 h-8 text-destructive" />
+            ) : (
+              <ShieldCheck className="w-8 h-8 text-success" />
+            )}
+          </motion.div>
+          <div>
+            <h3 className="text-2xl font-bold font-display text-foreground">
+              {result.prediction}
+            </h3>
+            <div className="flex items-center gap-2 text-muted-foreground mt-1">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-sm font-medium">Confidence: {result.confidence}%</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="w-full max-w-md">
+      <div className="p-6 md:p-8 bg-card">
+        {/* Confidence bar */}
+        <div className="mb-6">
+          <div className="flex justify-between text-xs text-muted-foreground mb-2">
+            <span>Confidence Level</span>
+            <span className="font-semibold">{result.confidence}%</span>
+          </div>
           <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${
-                isDiabetic ? "bg-destructive" : "bg-success"
-              }`}
-              style={{ width: `${result.confidence}%` }}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${result.confidence}%` }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className={`h-full rounded-full ${isDiabetic ? "bg-destructive" : "bg-success"}`}
             />
           </div>
         </div>
 
+        {/* Risk factors */}
         {result.riskFactors.length > 0 && (
-          <div className="w-full mt-2">
-            <p className="text-sm font-medium text-foreground mb-2">Risk Factors Identified:</p>
-            <ul className="text-sm text-muted-foreground space-y-1">
+          <div>
+            <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              {isDiabetic ? <AlertTriangle className="w-4 h-4 text-destructive" /> : <CheckCircle2 className="w-4 h-4 text-success" />}
+              {isDiabetic ? "Risk Factors Identified" : "Health Indicators"}
+            </p>
+            <div className="grid gap-2">
               {result.riskFactors.map((factor, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${
-                    isDiabetic ? "bg-destructive" : "bg-success"
-                  }`} />
-                  {factor}
-                </li>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + i * 0.1 }}
+                  className={`flex items-center gap-3 p-3 rounded-xl text-sm ${
+                    isDiabetic ? "bg-destructive/5" : "bg-success/5"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${isDiabetic ? "bg-destructive" : "bg-success"}`} />
+                  <span className="text-muted-foreground">{factor}</span>
+                </motion.div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
         {predictionId && isAuthenticated() && (
           <Button
             variant="outline"
-            className="mt-4"
+            className="mt-6 rounded-xl"
             onClick={() => downloadReport(predictionId)}
           >
             <FileDown className="w-4 h-4 mr-2" />
@@ -76,7 +104,7 @@ const ResultDisplay = ({ result, predictionId }: ResultDisplayProps) => {
           </Button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
