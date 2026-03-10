@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { predictDiabetes, type PatientData, type PredictionResult } from "@/lib/decisionTree";
-import { Stethoscope, RotateCcw, Activity, Droplets, Heart, Ruler, Syringe, Scale, Dna, Calendar } from "lucide-react";
+import { predictApi } from "@/lib/api";
+import { Stethoscope, RotateCcw, Activity, Droplets, Heart, Ruler, Syringe, Scale, Dna, Calendar, UserRound } from "lucide-react";
 import { motion } from "framer-motion";
 import ResultDisplay from "./ResultDisplay";
 import diabetesTestingImg from "@/assets/diabetes-testing.jpg";
@@ -35,9 +36,12 @@ const initialData: PatientData = {
 };
 
 const PredictionForm = () => {
+  const [patientName, setPatientName] = useState("");
   const [formData, setFormData] = useState<PatientData>(initialData);
   const [result, setResult] = useState<PredictionResult | null>(null);
+  const [predictionId, setPredictionId] = useState<number | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof PatientData, string>>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (key: keyof PatientData, value: string) => {
     const num = value === "" ? 0 : parseFloat(value);
@@ -62,23 +66,51 @@ const PredictionForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+
+    setSubmitting(true);
+    setPredictionId(null);
+
+    // Try backend first, fallback to client-side
+    try {
+      const backendResult = await predictApi({
+        patient_name: patientName || "Anonymous",
+        pregnancies: formData.pregnancies,
+        glucose: formData.glucose,
+        blood_pressure: formData.bloodPressure,
+        skin_thickness: formData.skinThickness,
+        insulin: formData.insulin,
+        bmi: formData.bmi,
+        diabetes_pedigree: formData.diabetesPedigree,
+        age: formData.age,
+      });
+      setResult({
+        prediction: backendResult.prediction as "Diabetic" | "Non-Diabetic",
+        confidence: backendResult.confidence,
+        riskFactors: backendResult.risk_factors,
+      });
+      setPredictionId(backendResult.id);
+    } catch {
+      // Backend unavailable — use client-side prediction
       const prediction = predictDiabetes(formData);
       setResult(prediction);
     }
+
+    setSubmitting(false);
   };
 
   const handleReset = () => {
+    setPatientName("");
     setFormData(initialData);
     setResult(null);
+    setPredictionId(null);
     setErrors({});
   };
 
   return (
     <section id="predict" className="py-20 px-4 relative">
-      {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(hsl(var(--primary)/0.03)_1px,transparent_1px)] bg-[size:24px_24px]" />
 
       <div className="max-w-6xl mx-auto relative">
@@ -133,6 +165,28 @@ const PredictionForm = () => {
             onSubmit={handleSubmit}
             className="lg:col-span-2 bg-card rounded-2xl shadow-premium p-6 md:p-8 border border-border"
           >
+            {/* Patient Name Field */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-6"
+            >
+              <Label htmlFor="patientName" className="text-sm font-medium text-foreground flex items-center gap-2 mb-1.5">
+                <UserRound className="w-3.5 h-3.5 text-primary" />
+                Patient Name
+                <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+              </Label>
+              <Input
+                id="patientName"
+                type="text"
+                placeholder="e.g., John Doe"
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                className="h-11 rounded-xl transition-all duration-200 hover:border-primary/50 focus:shadow-glow"
+              />
+            </motion.div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {fields.map((f, i) => (
                 <motion.div
@@ -167,9 +221,14 @@ const PredictionForm = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-              <Button type="submit" size="lg" className="flex-1 gradient-primary text-primary-foreground font-semibold text-base h-12 rounded-xl shadow-glow hover:shadow-elevated transition-all duration-300">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={submitting}
+                className="flex-1 gradient-primary text-primary-foreground font-semibold text-base h-12 rounded-xl shadow-glow hover:shadow-elevated transition-all duration-300"
+              >
                 <Stethoscope className="w-5 h-5 mr-2" />
-                Analyze & Predict
+                {submitting ? "Analyzing…" : "Analyze & Predict"}
               </Button>
               <Button type="button" variant="outline" size="lg" onClick={handleReset} className="h-12 rounded-xl">
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -185,7 +244,12 @@ const PredictionForm = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <ResultDisplay result={result} />
+            <ResultDisplay
+              result={result}
+              predictionId={predictionId}
+              patientName={patientName}
+              formData={formData}
+            />
           </motion.div>
         )}
       </div>
