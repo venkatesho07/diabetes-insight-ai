@@ -26,7 +26,7 @@ const fields: FieldConfig[] = [
   { key: "skinThickness", label: "Skin Thickness", placeholder: "e.g., 35", min: 0, max: 100, unit: "mm", icon: Ruler },
   { key: "insulin", label: "Insulin", placeholder: "e.g., 0", min: 0, max: 846, unit: "mu U/ml", icon: Syringe },
   { key: "bmi", label: "BMI", placeholder: "e.g., 33.6", min: 0, max: 70, unit: "kg/m²", icon: Scale },
-  { key: "diabetesPedigree", label: "Diabetes Pedigree Function", placeholder: "e.g., 0.627", min: 0, max: 2.5, unit: "", icon: Dna },
+  { key: "diabetesPedigree", label: "Diabetes Pedigree Function", placeholder: "e.g., 0.627", min: 0, max: 2.5, unit: "", icon: Dna, step: "0.001" },
   { key: "age", label: "Age", placeholder: "e.g., 50", min: 1, max: 120, unit: "years", icon: Calendar },
 ];
 
