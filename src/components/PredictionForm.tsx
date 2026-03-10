@@ -17,6 +17,7 @@ interface FieldConfig {
   max: number;
   unit: string;
   icon: React.ElementType;
+  step?: string;
 }
 
 const fields: FieldConfig[] = [
