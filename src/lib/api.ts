@@ -44,6 +44,38 @@ export async function loginApi(username: string, password: string) {
   return data;
 }
 
+// ─── Predict (backend) ───────────────────────────────────────────────
+export interface PredictPayload {
+  patient_name: string;
+  pregnancies: number;
+  glucose: number;
+  blood_pressure: number;
+  skin_thickness: number;
+  insulin: number;
+  bmi: number;
+  diabetes_pedigree: number;
+  age: number;
+}
+
+export interface PredictResponse {
+  id: number;
+  prediction: string;
+  confidence: number;
+  risk_factors: string[];
+}
+
+export async function predictApi(data: PredictPayload): Promise<PredictResponse> {
+  const res = await fetch(`${API_BASE}/predict`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw new Error("Backend prediction failed");
+  }
+  return res.json();
+}
+
 // ─── History (protected) ──────────────────────────────────────────────
 export interface HistoryRecord {
   id: number;

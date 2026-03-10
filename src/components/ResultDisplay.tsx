@@ -1,16 +1,50 @@
 import { type PredictionResult } from "@/lib/decisionTree";
-import { ShieldCheck, ShieldAlert, TrendingUp, FileDown, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { type PatientData } from "@/lib/decisionTree";
+import { ShieldCheck, ShieldAlert, TrendingUp, FileDown, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadReport, isAuthenticated } from "@/lib/api";
+import { generatePdfReport } from "@/lib/pdfReport";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 interface ResultDisplayProps {
   result: PredictionResult;
   predictionId?: number | null;
+  patientName?: string;
+  formData?: PatientData;
 }
 
-const ResultDisplay = ({ result, predictionId }: ResultDisplayProps) => {
+const ResultDisplay = ({ result, predictionId, patientName, formData }: ResultDisplayProps) => {
   const isDiabetic = result.prediction === "Diabetic";
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      // If we have a backend predictionId and user is authenticated, use backend PDF
+      if (predictionId && isAuthenticated()) {
+        await downloadReport(predictionId);
+      } else if (formData) {
+        // Client-side PDF generation
+        generatePdfReport({
+          patientName: patientName || "Anonymous",
+          prediction: result,
+          inputs: formData,
+        });
+      }
+    } catch {
+      // Fallback to client-side if backend fails
+      if (formData) {
+        generatePdfReport({
+          patientName: patientName || "Anonymous",
+          prediction: result,
+          inputs: formData,
+        });
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -93,13 +127,19 @@ const ResultDisplay = ({ result, predictionId }: ResultDisplayProps) => {
           </div>
         )}
 
-        {predictionId && isAuthenticated() && (
+        {/* PDF Download — always available */}
+        {formData && (
           <Button
             variant="outline"
             className="mt-6 rounded-xl"
-            onClick={() => downloadReport(predictionId)}
+            onClick={handleDownloadPdf}
+            disabled={downloading}
           >
-            <FileDown className="w-4 h-4 mr-2" />
+            {downloading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <FileDown className="w-4 h-4 mr-2" />
+            )}
             Download Medical Report (PDF)
           </Button>
         )}
