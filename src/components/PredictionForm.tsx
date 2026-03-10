@@ -208,7 +208,7 @@ const PredictionForm = () => {
                   <Input
                     id={f.key}
                     type="number"
-                    step={f.key === "diabetesPedigree" || f.key === "bmi" ? "0.01" : "1"}
+                    step={f.step || "1"}
                     placeholder={f.placeholder}
                     value={formData[f.key] || ""}
                     onChange={(e) => handleChange(f.key, e.target.value)}
