@@ -17,6 +17,7 @@ interface FieldConfig {
   max: number;
   unit: string;
   icon: React.ElementType;
+  step?: string;
 }
 
 const fields: FieldConfig[] = [
@@ -24,9 +25,9 @@ const fields: FieldConfig[] = [
   { key: "glucose", label: "Glucose Level", placeholder: "e.g., 148", min: 0, max: 200, unit: "mg/dL", icon: Droplets },
   { key: "bloodPressure", label: "Blood Pressure", placeholder: "e.g., 72", min: 0, max: 130, unit: "mm Hg", icon: Heart },
   { key: "skinThickness", label: "Skin Thickness", placeholder: "e.g., 35", min: 0, max: 100, unit: "mm", icon: Ruler },
-  { key: "insulin", label: "Insulin", placeholder: "e.g., 0", min: 0, max: 846, unit: "mu U/ml", icon: Syringe },
-  { key: "bmi", label: "BMI", placeholder: "e.g., 33.6", min: 0, max: 70, unit: "kg/m²", icon: Scale },
-  { key: "diabetesPedigree", label: "Diabetes Pedigree Function", placeholder: "e.g., 0.627", min: 0, max: 2.5, unit: "", icon: Dna },
+  { key: "insulin", label: "Insulin", placeholder: "e.g., 0", min: 0, max: 846, unit: "mu U/ml", icon: Syringe, step: "0.01" },
+  { key: "bmi", label: "BMI", placeholder: "e.g., 33.6", min: 0, max: 70, unit: "kg/m²", icon: Scale, step: "0.01" },
+  { key: "diabetesPedigree", label: "Diabetes Pedigree Function", placeholder: "e.g., 0.627", min: 0, max: 2.5, unit: "", icon: Dna, step: "0.001" },
   { key: "age", label: "Age", placeholder: "e.g., 50", min: 1, max: 120, unit: "years", icon: Calendar },
 ];
 
@@ -207,7 +208,7 @@ const PredictionForm = () => {
                   <Input
                     id={f.key}
                     type="number"
-                    step={f.key === "diabetesPedigree" || f.key === "bmi" ? "0.01" : "1"}
+                    step={f.step || "1"}
                     placeholder={f.placeholder}
                     value={formData[f.key] || ""}
                     onChange={(e) => handleChange(f.key, e.target.value)}
